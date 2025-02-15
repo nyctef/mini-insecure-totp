@@ -1,6 +1,7 @@
 use base32::Alphabet::Rfc4648;
 use clap::Parser;
 use color_eyre::{eyre::eyre, Result};
+use enigo::{Enigo, Keyboard, Settings};
 use hmac::{digest::InvalidLength, Hmac, Mac};
 use sha1::Sha1;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -56,6 +57,9 @@ fn generate_totp(timestamp: u64, time_step: u64, secret: &[u8]) -> Result<String
 #[derive(clap::Parser)]
 struct Cli {
     secret: String,
+
+    #[arg(long, name = "type")]
+    type_: bool,
 }
 
 fn main() {
@@ -70,5 +74,10 @@ fn main() {
         .unwrap()
         .as_secs();
     let code = generate_totp(timestamp, time_step, &secret).unwrap();
-    println!("{}", code);
+    if cli.type_ {
+        let mut enigo = Enigo::new(&Settings::default()).unwrap();
+        enigo.text(&code).unwrap();
+    } else {
+        println!("{}", code);
+    }
 }
