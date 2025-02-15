@@ -1,11 +1,9 @@
 use base32::Alphabet::Rfc4648;
+use clap::Parser;
 use color_eyre::{eyre::eyre, Result};
 use hmac::{digest::InvalidLength, Hmac, Mac};
 use sha1::Sha1;
-use std::{
-    process::exit,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 fn decode_secret(secret: &str) -> Result<Vec<u8>> {
     base32::decode(Rfc4648 { padding: true }, secret)
@@ -55,16 +53,17 @@ fn generate_totp(timestamp: u64, time_step: u64, secret: &[u8]) -> Result<String
     ))
 }
 
+#[derive(clap::Parser)]
+struct Cli {
+    secret: String,
+}
+
 fn main() {
     color_eyre::install().unwrap();
 
-    let args: Vec<String> = std::env::args().collect();
-    if args.len() != 2 {
-        println!("Usage: {} <base32-secret>", args[0]);
-        exit(1);
-    }
+    let cli = Cli::parse();
 
-    let secret = decode_secret(&args[1]).unwrap();
+    let secret = decode_secret(&cli.secret).unwrap();
     let time_step = 30; // Standard TOTP time step
     let timestamp = SystemTime::now()
         .duration_since(UNIX_EPOCH)

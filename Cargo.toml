@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 base32 = "0.5.1"
+clap = { version = "4.5.29", features = ["derive"] }
 color-eyre = "0.6.3"
 hmac = "0.12.1"
 sha1 = "0.10.6"
